@@ -1,0 +1,38 @@
+const Profile = require("../model/profile");
+const { capitalFirst } = require("capitalfirst");
+const mongofiles = require("mongofiles");
+const { checkbeforedelete } = require("checkbeforedelete");
+
+
+exports.updateusername = async (req, res) => {
+  var profilephoto;
+  const user = await Profile.findOne({ username: req.body.username });
+  const you = await Profile.findOne({
+    _id: req.params.id,
+  });
+
+ 
+  if (you) {                                                                              // First check its you 
+    if (!user || you.username === req.body.username) {                                    // then check username is available and username saved in db and from body are same
+      var id = req.params.id;
+      Profile.findByIdAndUpdate(
+        { _id: id },
+        { username: req.body.username, profilephoto: profilephoto }
+      ).exec((err, data) => {
+        if (err) {
+          return res.status(400).json({
+            pserror: err,
+          });
+        }
+        // Check if the old profile photo is a string before deleting it
+        if (typeof profilephoto === "string") {
+          var thepath = `uploads/profilephoto/${oldProfile}`;
+          checkbeforedelete({ path: thepath });
+        }
+        return res.json(data);
+      });
+    } else {
+      return res.json({ pserror: "Username unavailable" });
+    }
+  }
+};
